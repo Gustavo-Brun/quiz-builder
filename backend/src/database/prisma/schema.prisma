@@ -1,0 +1,48 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+    // directUrl = env("DIRECT_URL") // Uncomment if you use a separate direct connection URL for migrations (Used mainly for SUPABASE)
+}
+
+model Quizzes {
+    id    Int    @id @default(autoincrement())
+    title String @unique
+
+    questionnaire Questions[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+model Questions {
+    id         Int        @id @default(autoincrement())
+    question   String
+    answerType AnswerType
+
+    quiz   Quizzes @relation(fields: [quizId], references: [id], onDelete: Cascade)
+    quizId Int
+
+    answers QuestionAnswers[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
+enum AnswerType {
+    BOOLEAN
+    INPUT
+    CHECKBOX
+}
+
+model QuestionAnswers {
+    id         String     @id @default(cuid())
+    question   Questions  @relation(fields: [questionId], references: [id], onDelete: Cascade)
+    questionId Int
+    type       AnswerType
+    answer     String
+    isCorrect  Boolean
+}
